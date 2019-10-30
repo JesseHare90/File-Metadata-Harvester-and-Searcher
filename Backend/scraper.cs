@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace myApp
 {   
@@ -7,6 +8,7 @@ namespace myApp
 
     class Program
     {
+        //checks input, if y/Y or n/N, return y or n respectively, otherwise returns "invalid entry"
         public static string YesOrNo(string input){
             string TempInput = input.ToLower();
             if((TempInput == "y")||(TempInput == "n")){
@@ -17,6 +19,36 @@ namespace myApp
                 return TempInput;
             }
         }
+        //used to perform a recursive search for files in a specified directory, will ignore files/directories that throw access errors
+        //returns an array of filepaths for each file found
+        public static string[] FindAllFiles(string rootDir) {
+            var pathsToSearch = new Queue<string>();
+            var foundFiles = new List<string>();
+
+            pathsToSearch.Enqueue(rootDir);
+
+            while (pathsToSearch.Count > 0) {
+                var dir = pathsToSearch.Dequeue();
+
+                try {
+                    var files = Directory.GetFiles(dir);
+                    foreach (var file in Directory.GetFiles(dir)) {
+                        foundFiles.Add(file);
+                    }
+
+                    foreach (var subDir in Directory.GetDirectories(dir)) {
+                        pathsToSearch.Enqueue(subDir);
+                    }
+
+                } catch (Exception /* TODO: catch correct exception */) {
+                    // Swallow.  Gulp!
+                }
+            }
+
+            return foundFiles.ToArray();
+        }
+
+
         
         static void Main(string[] args)
         {
@@ -33,7 +65,7 @@ namespace myApp
                 try{
                     FileAttributes TempAttr = File.GetAttributes(args[1]);
                 }
-                catch (FileNotFoundException ex){
+                catch (FileNotFoundException ){
                     Console.WriteLine("Error, File not found!");
                     System.Environment.Exit(1);
 
@@ -53,11 +85,19 @@ namespace myApp
                     if (UserInputChoice == "y"){
                         //Console.WriteLine("chose recursive");
                         Console.WriteLine("Scanning the directory: "+args[1]+" for files recursively...");
+                        string[] files = FindAllFiles(args[1]);
+                        foreach (string file in files){
+                            Console.WriteLine(file);
+                        }
 
                     }
                     else if (UserInputChoice == "n"){
                         //Console.WriteLine("chose non recursive");
                         Console.WriteLine("Scanning the directory: "+args[1]+" for file non-recursively...");
+                        string[] files = Directory.GetFiles(args[1],"*.*");
+                        foreach (string file in files){
+                            Console.WriteLine(file);
+                        }
                     }
                     //Console.WriteLine(UserInputChoice);
                 }
