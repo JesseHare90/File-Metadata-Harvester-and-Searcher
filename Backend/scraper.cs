@@ -20,11 +20,16 @@ namespace myApp
         
         static void Main(string[] args)
         {
+           //check that the correct number of args have been supplied - the program itself and the directory to scrape
+           //if incorrect number of args, print error message and exit
             if (args.Length == 1 | args.Length > 2){
                 Console.WriteLine("ERROR: Only require a valid filepath for execution");
             }
+            //otherwise, check filepath is valid, and ask user whether they would like to scrap file metadata from the specified directory
+            //recursively or non-recursively
             else{
                 //check if provided filepath is valid and exists on the filesystem
+                //if not, catch exception and exit
                 try{
                     FileAttributes TempAttr = File.GetAttributes(args[1]);
                 }
@@ -62,22 +67,7 @@ namespace myApp
                 }
             
             
-            /* 
-            //get the directory you wish to scan for metadata
-            Console.WriteLine("Please enter your search directory");
-            string c = Console.ReadLine();
-            Console.WriteLine("you have chosen to scan the directory: "+c);
-            Console.WriteLine("Press enter to continue, any key to quit");
-            string choice = Console.ReadLine();
-            if(choice == ""){
-                Console.WriteLine("Do you wish to perform a recursive or non-recursive search?");
-
-                
-            }
-            else{
-                Console.WriteLine("Exiting Program");
-            }
-            */
+            
             }
         }
     }
