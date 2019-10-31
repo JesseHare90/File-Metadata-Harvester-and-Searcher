@@ -8,6 +8,8 @@ namespace myApp
 
     class Program
     {
+        
+
         //checks input, if y/Y or n/N, return y or n respectively, otherwise returns "invalid entry"
         public static string YesOrNo(string input){
             string TempInput = input.ToLower();
@@ -46,6 +48,14 @@ namespace myApp
             }
 
             return foundFiles.ToArray();
+        }
+
+        public static string GetMetadata(string file){
+            string FileType = Path.GetExtension(file);
+            string FileName = Path.GetFileNameWithoutExtension(file);
+            string FileDir = Path.GetDirectoryName(file);
+            return "FileName: "+FileName+", FileType: "+FileType+", Directory: "+FileDir;
+
         }
 
 
@@ -97,6 +107,8 @@ namespace myApp
                         string[] files = Directory.GetFiles(args[1],"*.*");
                         foreach (string file in files){
                             Console.WriteLine(file);
+                            string fileData = GetMetadata(file);
+                            Console.WriteLine(fileData);
                         }
                     }
                     //Console.WriteLine(UserInputChoice);
