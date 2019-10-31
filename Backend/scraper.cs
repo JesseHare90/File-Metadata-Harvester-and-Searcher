@@ -1,6 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using MetadataExtractor;
+
+
 
 namespace myApp
 {   
@@ -33,12 +36,12 @@ namespace myApp
                 var dir = pathsToSearch.Dequeue();
 
                 try {
-                    var files = Directory.GetFiles(dir);
-                    foreach (var file in Directory.GetFiles(dir)) {
+                    var files = System.IO.Directory.GetFiles(dir);
+                    foreach (var file in System.IO.Directory.GetFiles(dir)) {
                         foundFiles.Add(file);
                     }
 
-                    foreach (var subDir in Directory.GetDirectories(dir)) {
+                    foreach (var subDir in System.IO.Directory.GetDirectories(dir)) {
                         pathsToSearch.Enqueue(subDir);
                     }
 
@@ -50,12 +53,21 @@ namespace myApp
             return foundFiles.ToArray();
         }
 
+        //This function is used to extract metadata from each file, and returning it as a string
         public static string GetMetadata(string file){
             string FileType = Path.GetExtension(file);
             string FileName = Path.GetFileNameWithoutExtension(file);
             string FileDir = Path.GetDirectoryName(file);
-            return "FileName: "+FileName+", FileType: "+FileType+", Directory: "+FileDir;
-
+            FileInfo FileData = new FileInfo(file);
+            long size = FileData.Length;
+            DateTime CreationTime = FileData.CreationTime;
+            DateTime AccessTime = FileData.LastAccessTime;
+            DateTime UpdatedTime = FileData.LastWriteTime;
+            //need to figure out a way to get the file owner
+            string fileMetaData = "FileName:"+FileName+",FileType:"+FileType+",Size(Bytes):"+size+",Directory:"+FileDir+",Created:"+CreationTime+",Accessed:"+AccessTime+",Updated:"+UpdatedTime;
+            
+            // now we have the basic generic file metadata, we will add extra metadata for each file depending on it's type
+            return fileMetaData;
         }
 
 
@@ -93,25 +105,27 @@ namespace myApp
                         UserInputChoice = YesOrNo(UserInput);
                     }
                     if (UserInputChoice == "y"){
-                        //Console.WriteLine("chose recursive");
+                        
                         Console.WriteLine("Scanning the directory: "+args[1]+" for files recursively...");
                         string[] files = FindAllFiles(args[1]);
                         foreach (string file in files){
-                            Console.WriteLine(file);
+                            //Console.WriteLine(file);
+                            string fileData = GetMetadata(file);
+                            Console.WriteLine(fileData);
                         }
 
                     }
                     else if (UserInputChoice == "n"){
-                        //Console.WriteLine("chose non recursive");
+                        
                         Console.WriteLine("Scanning the directory: "+args[1]+" for file non-recursively...");
-                        string[] files = Directory.GetFiles(args[1],"*.*");
+                        string[] files = System.IO.Directory.GetFiles(args[1],"*.*");
                         foreach (string file in files){
-                            Console.WriteLine(file);
+                            //Console.WriteLine(file);
                             string fileData = GetMetadata(file);
                             Console.WriteLine(fileData);
                         }
                     }
-                    //Console.WriteLine(UserInputChoice);
+                    
                 }
                 else{
                     Console.WriteLine("ERROR: Please provide a valid directory");
