@@ -5,6 +5,7 @@ using MetadataExtractor;
 
 
 
+
 namespace myApp
 {   
     
@@ -55,6 +56,7 @@ namespace myApp
 
         //This function is used to extract metadata from each file, and returning it as a string
         public static string GetMetadata(string file){
+            string[] ignoredAttributes = {"File Name","File Size","File Modified Date","Detected File Type Name","Detected File Type Long Name","Expected File Name Extension"};
             string FileType = Path.GetExtension(file);
             string FileName = Path.GetFileNameWithoutExtension(file);
             string FileDir = Path.GetDirectoryName(file);
@@ -63,8 +65,40 @@ namespace myApp
             DateTime CreationTime = FileData.CreationTime;
             DateTime AccessTime = FileData.LastAccessTime;
             DateTime UpdatedTime = FileData.LastWriteTime;
+            Console.WriteLine(file);
+            //We will catch any exceptions thrown due to incompatibilities of certain files with the ImageMetadataReader
+            //If an exception is thrown, we will just stick to the basic set of attributes already gathered
+            // otherwise, we will gather the extended list of attributes from files that are compatible
+            try{
+                IEnumerable<MetadataExtractor.Directory> directoriesTest = ImageMetadataReader.ReadMetadata(file);
+            }
+            catch(MetadataExtractor.ImageProcessingException){
+                //need to figure out a way to get the file owner
+                string fileMetaDataBasic = "FileName:"+FileName+",FileType:"+FileType+",Size:"+size+",Directory:"+FileDir+",Created:"+CreationTime+",Accessed:"+AccessTime+",Updated:"+UpdatedTime;
+            
+                // now we have the basic generic file metadata, we will add extra metadata for each file depending on it's type
+                return fileMetaDataBasic;    
+            }
+            
+            IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(file);
+            foreach (var directory in directories)
+            foreach (var tag in directory.Tags)
+                if(!(Array.Exists(ignoredAttributes, element => element == tag.Name))){
+                    if(tag.Name == "Detected MIME Type"){
+                        Console.WriteLine("MIME Type:"+tag.Description);
+                    }
+                    else{
+                         Console.WriteLine($"{tag.Name}:{tag.Description}");
+                    }
+                   
+                }
+                
+
+                
+                
+                
             //need to figure out a way to get the file owner
-            string fileMetaData = "FileName:"+FileName+",FileType:"+FileType+",Size(Bytes):"+size+",Directory:"+FileDir+",Created:"+CreationTime+",Accessed:"+AccessTime+",Updated:"+UpdatedTime;
+            string fileMetaData = "FileName:"+FileName+",FileType:"+FileType+",Size:"+size+",Directory:"+FileDir+",Created:"+CreationTime+",Accessed:"+AccessTime+",Updated:"+UpdatedTime;
             
             // now we have the basic generic file metadata, we will add extra metadata for each file depending on it's type
             return fileMetaData;
